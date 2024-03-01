@@ -1,0 +1,10 @@
+The reason why Intel and M1 processors show differences, in executing code is because of
+how they handle floating point compiler optimizations for their respective architectures. 
+When dealing with numbers floating point operations can result in precision loss. 
+Rounding errors due to the finite representation of these numbers in computer hardware. 
+In the case of expression calculations (c1) compilers. Evaluate them during compile time leading 
+to a consistent outcome of 0.0 for both M1 and Intel processors because identical terms cancel each other out.
+However when variables are involved (c2) the calculation depends on runtime evaluation. Can be influenced by 
+processor architecture and compiler optimizations. The M1 processor, based on ARM architecture may handle floating
+point arithmetic from Intels architecture. This difference could be related to factors such as FPU design, precision 
+of calculations or adherence, to IEEE 754 standards.
