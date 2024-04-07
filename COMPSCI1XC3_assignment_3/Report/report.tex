@@ -1,0 +1,311 @@
+\documentclass[a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{microtype,etex,listings,color,parskip}
+\usepackage[margin=2cm]{geometry}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{algpseudocode}
+\usepackage{amsmath} 
+\lstset{
+  language=C,
+  tabsize=10,
+  showstringspaces=false,
+  breaklines=true,
+  basicstyle=\ttfamily,
+  keywordstyle=\color[rgb]{0.1,0.3,0.7}\ttfamily,
+  stringstyle=\color[rgb]{0.7,0.1,0.3}\ttfamily,
+  commentstyle=\color[rgb]{0.3,0.4,0.3}\ttfamily,
+  columns=fixed,
+  numberstyle=\sffamily\scriptsize,
+  frame=lines,
+  framexleftmargin=10pt,
+  numbers = left,
+  numberstyle = \footnotesize
+}
+
+\begin{document}
+\begin{titlepage}
+    \centering
+    \vspace*{\fill} 
+    {\Large\bfseries Assignment 3: Programming Report \par}
+    \vspace{1.5cm} 
+    {\large\itshape Lucas Machado \par} 
+    \vspace{0.5cm} 
+    {\large Student ID: 400507829 \par}
+    \vspace{1.5cm} 
+    {\large Scientific Programming: Operations on Matrices \par}
+    \vspace{1cm} 
+    {\large Monday, March 25, 2024 \par} 
+    \vspace*{\fill} 
+\end{titlepage}
+
+
+
+\section{Solving the Linear System of equations $Ax = b$}
+To solve the system of linear equations, we will use  Gaussian Elimination. For our algorithm to solve the system, we will use forward elimination and backward substitution. However, we will not use row swapping as it is not necessary to implement, and if we were to implement it, then the code would be more complex, and we would have to deal with more factors. To simplify the algorithm's explanation, we will walk through an example, explain how it works, and provide examples to go with the explanations to make it as easy as possible for anyone to understand. To keep things very simple, we will work with an arbitrary 2×2 matrix A and an arbitrary 2×1 vector B to explain the first steps in the algorithm thus, 
+
+Given a matrix $A$ ($2 \times 2$) and a vector $B$ ($2 \times 1$):
+\[
+A = \begin{pmatrix}
+a_{11} & a_{12} \\
+a_{21} & a_{22}
+\end{pmatrix}, \quad B = \begin{pmatrix}
+b_{1} \\
+b_{2}
+\end{pmatrix}
+\]
+
+\subsection{Initial Conditions on Matrices}
+\begin{enumerate}
+    \item Check to make sure that the matrix $A$ is square ($N1 = M1$).
+    \item Verify that the number of rows in Matrix A is equal to the number of rows in Matrix $B$ ($N1 = N2$).
+    \item Ensure that Matrix B is a column vector $B$ ($M2 = 1$).
+\end{enumerate}
+
+\subsection{Creating Augmented Matrix}
+{Create an augmented matrix:} by using matrix A and appending matrix B to the end of it.
+
+\[
+\text{Augmented Matrix} = \begin{pmatrix}
+    a_{11} & a_{12} & | & b_{1} \\
+    a_{21} & a_{22} & | & b_{2}
+\end{pmatrix}
+\]
+
+\subsection{Normalization of the Pivot Row}
+We want to normalize each pivot row before we start the forward elimination. This means we will divide every number in the pivot row by the pivot element, which makes the pivot element that we currently work with 1. That is the number on the diagonal of the matrix.
+
+
+Hence, the pivot number in the first row is $a_{11}$. Moreover, we divide all of the elements in the pivot row by $a_{11}$, which makes the first pivot number equal to 1:
+
+\[
+\text{Row}_1 = \frac{\text{Row}_1}{a_{11}}
+\]
+
+Then the augmented matrix would look like this:
+
+\[
+\begin{pmatrix}
+    1 & \frac{a_{12}}{a_{11}} & | & \frac{b_{1}}{a_{11}} \\
+    a_{21} & a_{22} & | & b_{2}
+\end{pmatrix}
+\]
+
+Doing this will make eliminating the elements below the pivot element easier.
+
+\subsection{Forward Elimination Continued}
+Now, we will make the number below our pivot number 0, $a_{21}$, and we would do this to all of the elements if there were more. This is done by the following:
+
+\[
+\text{Row}_2 = \text{Row}_2 - a_{21} \times \text{Row}_1
+\]
+
+Then the augmented matrix would look like:
+
+\[
+\begin{pmatrix}
+    1 & \frac{a_{12}}{a_{11}} & | & \frac{b_{1}}{a_{11}} \\
+    0 & a'_{22} & | & b'_{2}
+\end{pmatrix}
+\]
+
+with $a'_{22}$ and $b'_{2}$ being the changed numbers after the elimination 
+
+\subsection{Backward Substitution}
+After we do the forward elimination, we will get the augmented matrix to be in upper triangular form. This makes it very simple to solve for the unknowns, as we start from the last row and then substitute the known variables into the equations we do not know. We keep doing this until we find all of the unknowns. 
+
+
+Form the example that we have been using to find the value of $x_2$ we perform, 
+
+\[
+x_2 = \frac{b'_{2}}{a'_{22}}
+\]
+
+Then, we substitute $x_2$ into the equation of the first row of the augmented matrix, and this will let us find what $x_1$ is, and thus, we will solve the system. Now, let us go through how the program would run. 
+
+\[
+x_1 = \frac{b_{1} - a_{12}x_2}{a_{11}}
+\]
+
+\subsection{Programming Running Example}
+Now, we will provide an example of running the program and explain the output and the process of obtaining the solution. 
+
+\subsubsection{Input}
+We first run make and then, ./math\_matrix 2 2 2 1 solve print in the command line, and then we get a random matrix \(A\) and vector \(B\). Please note that for this example, we are looking at the main sections of the code and not the parts that handle errors to ensure that it is easy to understand:
+
+\[
+A = \begin{pmatrix}
+3.302049 & -2.470746 \\
+-5.825511 & -9.356506
+\end{pmatrix}, \quad B = \begin{pmatrix}
+5.202234 \\
+-6.052324
+\end{pmatrix}
+\]
+
+\subsubsection{Initial Augmented Matrix}
+The augmented matrix that we get from appending \(B\) to \(A\):
+
+\[
+\text{Augmented Matrix} = \begin{pmatrix}
+3.302049 & -2.470746 & | & 5.202234 \\
+-5.825511 & -9.356506 & | & -6.052324
+\end{pmatrix}
+\]
+
+The code that dose this is below as we simply add the values to A and then append B at the end, 
+\begin{verbatim}
+for (int row = 0; row < N1; row++) {
+    for (int col = 0; col < M1; col++) {
+        augmentedMatrix[row][col] = A[row][col];
+    }
+    augmentedMatrix[row][M1] = B[row][0];
+}
+\end{verbatim}
+
+\subsubsection{Normalizing Row 1}
+Then, the first row is normalized by dividing each element in the pivot row by the pivot number, which is \(3.302049\):
+
+\[
+\begin{pmatrix}
+1.000000 & -0.748246 & | & 1.575457 \\
+-5.825511 & -9.356506 & | & -6.052324
+\end{pmatrix}
+\]
+
+The code that does this is below. We iterate through the pivot row and divide every element by this first pivot value.
+
+\begin{verbatim}
+double pivot = augmentedMatrix[pivotRow][pivotRow];
+for (int col = pivotRow; col <= M1; col++) {
+    augmentedMatrix[pivotRow][col] /= pivot;
+}
+\end{verbatim}
+
+\subsubsection{Forward Elimination for Row 1}
+After normalization, the program begins the forward elimination to make the numbers below the pivot zero. The matrix then turns into the following:
+
+\[
+\begin{pmatrix}
+1.000000 & -0.748246 & | & 1.575457 \\
+0.000000 & -13.715423 & | & 3.125515
+\end{pmatrix}
+\]
+
+This step includes subtracting the correct multiple of the first row from the second row, and the code that does this is below:
+
+\begin{verbatim}
+for (int elimRow = pivotRow + 1; elimRow < N1; elimRow++) {
+    double factor = augmentedMatrix[elimRow][pivotRow];
+    for (int col = pivotRow; col <= M1; col++) {
+        augmentedMatrix[elimRow][col] -= factor * augmentedMatrix[pivotRow][col];
+    }
+}
+\end{verbatim}
+
+\subsubsection{Normalizing Row 2}
+Then the program normalizes the second row just like we did the first time, but now we are dividing the second pivot row by the pivot number, which is \(-13.715423\), and we get:
+
+\[
+\begin{pmatrix}
+1.000000 & -0.748246 & | & 1.575457 \\
+0.000000 & 1.000000 & | & -0.227883
+\end{pmatrix}
+\]
+
+This ensures the pivot element of the second row is also 1.
+
+\subsubsection{Back Substitution}
+Now, after the forward substitution is done, we have the augmented matrix in the upper triangular form:
+
+\[
+\begin{pmatrix}
+1.000000 & -0.748246 & | & 1.575457 \\
+0.000000 & 1.000000 & | & -0.227883
+\end{pmatrix}
+\]
+
+Now, the program starts the back substitution from the last row to solve for the variables. And the last row corresponds to the following equation \(0 \cdot x_1 + 1 \cdot x_2 = -0.227883\), then we solve for \(x_2\):
+\[
+x_2 = -0.227883
+\]
+
+Then the program moves to the first row which is \(1 \cdot x_1 - 0.748246 \cdot x_2 = 1.575457\), and then the program substitutes the value of \(x_2\) to solve for \(x_1\):
+
+\[
+x_1 = 1.575457 + 0.748246 \times (-0.227883)
+\]
+
+This results in:
+
+\[
+x_1 = 1.404944
+\]
+
+Then the program is done all of the steps, and the result is the solution to the system of linear equations, which is, \(Ax = B\) is:
+
+\[
+x = \begin{pmatrix}
+1.404944 \\
+-0.227883
+\end{pmatrix}
+\]
+
+The code that performs the back substitution is below. It starts by initializing each \(x_i\) with the value from the augmented matrix corresponding to \(b_i\). Then, it iteratively subtracts the known variables multiplied by their coefficients and then divides the coefficient of the unknown that is currently being solved if it is not normalized to 1 already. 
+
+\begin{verbatim}
+for (int row = N1 - 1; row >= 0; row--) {
+    x[row] = augmentedMatrix[row][M1];
+    for (int col = row + 1; col < N1; col++) {
+        x[row] -= augmentedMatrix[row][col] * x[col];
+    }
+    if (augmentedMatrix[row][row] != 1) {
+        x[row] /= augmentedMatrix[row][row];
+    }
+}
+\end{verbatim}
+
+
+\section{Segmentation Fault}
+Please note that I am on Mac OS using a MacBook M2 Pro, and using LLDB as GDB is not an option; due to this, debugging with LLDB is different than with GDB, and it needs to be more specific. I kept getting the following error, \texttt{queue = 'com.apple.main-thread', stop reason = EXC\_BAD\_ACCESS (code=2, address=0x16f603ff8)}. This was a common error for those trying to debug a segmentation fault across the internet using LLDB. Despite getting this error, I used Replit to try and use the GDB, and it worked, but it still needed to be specific. Despite this, I was able to get more information about the error. Now, let us explain what is happening.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{Segmentation.png}
+\caption{Segmentation fault, terminal GDB debugging}
+\label{fig:dog}
+\end{figure}
+
+As we can see from the figure, the line causing the is 37, but since that is the Replit file, the line is off from the actual file, and in my VScode, the line is 41. If we were using GDB on Windows, we could get more information, but this tells us enough information, and we can break down why this is happening. We are calling ./math matrix 591 591 591 591 add, which is creating a vast matrix that is 591*591 sized matrix A and 591*591  sized matrix B, and the program is trying to add these two matrices and stores them in a result matrix of the same size. The main issue is why we are getting the segmentation fault error issues with stack memory overflow. This is because of the allocation of a large matrix as local variables in the primary function exceed the stack size limit of my environment.The allocated memory for the matrices in the \texttt{addMatrices} function is substantial. Specifically, for three matrices each of size $591 \times 591$ doubles, the required memory is:
+
+\[ 3 \times 591^2 \times 8 \, \text{bytes} \]
+
+With the notion that each double usually occupies 8 bytes, the total memory allocation is approximately 24 MB. This substantial allocation on the stack can easily lead to a segmentation fault due to exceeding the stack's memory limits. One potential solution is to use dynamic memory allocation, which allocates memory on the heap instead of the stack.
+
+\section{Running The Program}
+
+In order to run the program, follow the commands below:
+
+\begin{enumerate}
+    \item Compile the program:
+    \begin{verbatim}
+        make
+    \end{verbatim}
+    
+    \item Run the program:
+    \begin{verbatim}
+        ./math_matrix <nrowsA> <ncolsA> <nrowsB> <ncolsB> <operation> [print]
+    \end{verbatim}
+\end{enumerate}
+
+\section{Appendix}
+
+\lstinputlisting{functions.c}
+\lstinputlisting{math_matrix.c}
+\lstinputlisting{Makefile}
+
+
+
+
+\end{document}
