@@ -1,0 +1,121 @@
+\documentclass[a4paper]{article}
+\usepackage[english]{babel}
+\usepackage{microtype,etex,listings,color,parskip}
+\usepackage[margin=2cm]{geometry}
+\usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{graphicx}
+\usepackage{algpseudocode}
+\usepackage{amsmath} 
+\lstset{
+  language=C,
+  tabsize=10,
+  showstringspaces=false,
+  breaklines=true,
+  basicstyle=\ttfamily,
+  keywordstyle=\color[rgb]{0.1,0.3,0.7}\ttfamily,
+  stringstyle=\color[rgb]{0.7,0.1,0.3}\ttfamily,
+  commentstyle=\color[rgb]{0.3,0.4,0.3}\ttfamily,
+  columns=fixed,
+  numberstyle=\sffamily\scriptsize,
+  frame=lines,
+  framexleftmargin=10pt,
+  numbers = left,
+  numberstyle = \footnotesize
+}
+
+\begin{document}
+\begin{titlepage}
+    \centering
+    \vspace*{\fill} 
+    {\Large\bfseries Assignment 4: Programming Report \par}
+    \vspace{1.5cm} 
+    {\large\itshape Lucas Machado \par} 
+    \vspace{0.5cm} 
+    {\large Student ID: 400507829 \par}
+    \vspace{1.5cm} 
+    {\large Scientific Programming: Rule-Based Sentiment Analysis \par}
+    \vspace{1cm} 
+    {\large Sunday, April 7, 2024 \par} 
+    \vspace*{\fill} 
+\end{titlepage}
+
+\section{Introduction}
+The program performs rule-based sentiment analysis, using the VADER lexicon rules to evaluate the sentiment of sentences. This report outlines the program's design, its functions, and usage instructions.
+
+\section{Text Files and Data}
+\subsection{VADER Lexicon}
+The program uses text files; the first file (\texttt{vader\_lexicon.txt}), which MIT created, contains the data. The file contains many words with specific stats about each word. Here is an example of a line in the text file:
+
+\begin{verbatim}
+clean 1.7 0.78102 [3, 1, 2, 1, 2, 1, 3, 2, 1, ...]
+\end{verbatim}
+
+The data is in line with the word "clean," with a score of 1.7, a standard deviation of 0.78102, and an array of sentiment intensity scores represented by \texttt{[3, 1, 2, 1, 2, 1, 3, 2, 1, 1]}. The rest of the data in the text file has this same structure.
+\subsection{Validation Data}
+
+There is one more text file (\texttt{validation.txt}) that contains sentences. The program performs the sentiment analysis on the sentences in this file. Here is an example of how a sentence might be structured in the file:
+
+\begin{verbatim}
+VADER is not smart, handsome, nor funny.
+\end{verbatim}
+
+All of the sentences in \texttt{validation.txt}, are analyzed by the program to determine sentiment scores based on previously mentioned lexicon data from \texttt{vader\_lexicon.txt}.
+
+
+\section{Program Structure and Functions}
+
+There are three functions in the program, not including the main.
+\subsection{Function 1 readDictionaryAndPopulateWords}
+The primary purpose of the \texttt{readDictionaryAndPopulateWords} function is to get all the data from (\texttt{vader\_lexicon.txt}) and add it to an array of words. The words are structs in C, meaning that we store the attributes of each word in it, such as the score and SD. This is done by reading each line in the text file, parsing the data for each word, and adding all the information to the specific word struct.
+
+\subsection{Function 2 computeSentimentScore}
+
+Now that we have all of the data in an array of words, we can use it to compute the sentiment score of a line of text, and this is what the function \texttt{computeSentimentScore} does. The function takes in a sentence, simply a string of characters. Then, the function will have a score (sentiment score) and a count for the number of words in the sentence. The function breaks up each sentence into words one at a time. It first looks at the first word in the sentence; it then iterates through our array of words and checks if the word is in the array. If the word is in the array, then it gets the score that is associated with that word, and it adds it to the score, but if it is not, then it adds 0 to the score. Then, at the end of the function, the total score will be divided by the number of words in the sentence. Thus, this gives the sentence score for a sentence. Note that this function operates on only one sentence (The one that is passed into the function).  
+
+\subsection{performSentimentAnalysis}
+
+The primary purpose of the \texttt{performSentimentAnalysis} function is to print out the sentiment analysis performed on a sentence and call the \texttt{computeSentimentScore} to compute the score of each sentence. The function iterates through each line in the \texttt{validation.txt} and passes the sentence into \texttt{performSentimentAnalysis} to compute the sentence's score. Then, the function prints out the line that was read along with the sentiment score in an easy-to-read format.
+
+\section{Execution Instructions}
+
+First, run the command - \texttt{Make}\\
+Second, run \texttt{./mySA vader\_lexicon.txt validation.txt}
+
+\subsection{Compilation and Running}
+Here is an example of what the process of running the program in the terminal will look like:
+
+\begin{verbatim}
+make
+
+gcc -Wall -g -o mySA mySA.c
+
+user@hostname % ./mySA vader_lexicon.txt validation.txt
+
+
+       string sample                                                                  score
+--------------------------------------------------------------------------------------------
+VADER is smart, handsome, and funny.                                                  0.97
+VADER is smart, handsome, and funny!                                                  0.97
+VADER is very smart, handsome, and funny.                                             0.83
+VADER is VERY SMART, handsome, and FUNNY.                                             0.83
+VADER is VERY SMART, handsome, and FUNNY!!!                                           0.83
+VADER is VERY SMART, uber handsome, and FRIGGIN FUNNY!!!                              0.64
+VADER is not smart, handsome, nor funny.                                              0.83
+The book was good.                                                                    0.47
+At least it isn't a horrible book.                                                    -0.36
+The book was only kind of good.                                                       0.61
+The plot was good, but the characters are uncompelling and the dialog is not great.   0.27
+Today SUX!                                                                            -0.75
+Today only kinda sux! But I'll get by, lol                                            0.16
+Make sure you :) or :D today!                                                         0.80
+Not bad at all                                                                        -0.62
+\end{verbatim}
+
+\section{Appendix}
+
+\lstinputlisting{Makefile}
+\lstinputlisting{functions.h}
+\lstinputlisting{mySA.c}
+
+\end{document}
